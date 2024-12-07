@@ -1,0 +1,11 @@
+{
+  "name": "cursocoderhousebackend",
+  "version": "1.0.0",
+  "description": "aula 1 de back end",
+  "main": "productManager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gustavo Rezende",
+  "license": "ISC"
+}
