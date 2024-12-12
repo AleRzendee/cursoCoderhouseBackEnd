@@ -4,7 +4,8 @@
 
 <h3> Aulas com entrega:</h3>
 <ul>
-<li>Aula 2 ( Classes com ECMAScript e ECMAScript avançado )</li>
+<div>Aula 2 ( Classes com ECMAScript e ECMAScript avançado )</div>
+<div>Aula 4 ( Gestão de arquivos em JavaScript )</div>
 
 </ul>
 
