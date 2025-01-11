@@ -6,6 +6,7 @@
 <ul>
 <div>Aula 2 ( Classes com ECMAScript e ECMAScript avançado )</div>
 <div>Aula 4 ( Gestão de arquivos em JavaScript )</div>
+<div>Aula 6 ( Servidor com Express )</div>
 
 </ul>
 
