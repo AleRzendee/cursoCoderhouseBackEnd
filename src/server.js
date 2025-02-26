@@ -1,12 +1,21 @@
 const express = require('express');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const { engine } = require('express-handlebars');
 const fs = require('fs');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
 const PORT = 3000;
 const DATA_PATH = 'products.json';
 
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
+app.set('views', './views'); //TODO handlebars configuration
 
-
+app.use(express.static('public'));
 app.use(express.json());
 
 const getProducts = async () => {
@@ -18,23 +27,46 @@ const getProducts = async () => {
     }
 };
 
-app.get('/products', async (req, res) => {
+//! Home Route
+app.get('/', async (req, res) => {
     const products = await getProducts();
-    res.json(products);
-}); // Rota para obter todos os produtos
-
-//! ID Routes
-app.get('/products/:id', async (req, res) => {
-    const products = await getProducts();
-    const product = products.find(p => p.id === parseInt(req.params.id));
-
-    if (!product) {
-        return res.status(404).json({ message: 'Produto não encontrado' });
-    }
-
-    res.json(product);
+    res.render('home', { products });
 });
 
-app.listen(PORT, () => {
+app.get('/realtimeproducts', async (req, res) => {
+    const products = await getProducts();
+    res.render('realTimeProducts', { products });
+});
+
+//? WebSockets
+io.on('connection', (socket) => {
+    console.log('Novo cliente conectado');
+
+    socket.emit('updateProducts', getProducts());
+
+    socket.on('addProduct', async (product) => {
+        let products = await getProducts();
+        const newProduct = {
+            id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
+            ...product
+        };
+        products.push(newProduct);
+        await fs.promises.writeFile(DATA_PATH, JSON.stringify(products, null, 2));
+
+        io.emit('updateProducts', products);
+    });
+
+    socket.on('deleteProduct', async (id) => {
+        let products = await getProducts();
+        const filteredProducts = products.filter(product => product.id !== id);
+
+        if (products.length !== filteredProducts.length) {
+            await fs.promises.writeFile(DATA_PATH, JSON.stringify(filteredProducts, null, 2));
+            io.emit('updateProducts', filteredProducts);
+        }
+    });
+});
+
+server.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
-}); //********************************
+});
