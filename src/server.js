@@ -1,20 +1,19 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const passport = require('passport');
 const { engine } = require('express-handlebars');
-const fs = require('fs');
-const bcrypt = require('bcryptjs');
+require('./config/passport');
 
 const app = express();
 const PORT = 3000;
-const USERS_FILE = 'users.json';
 
-//TODO Handlebars
+//TODO Handlebars configuration
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
-//TODO Middleware
-app.use(express.static('public'));
+//TODO Middleware configuration
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
@@ -22,79 +21,52 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Read files //
-const getUsers = async () => {
-    try {
-        const data = await fs.promises.readFile(USERS_FILE, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-};
-
-//!Login routes //
+//! login route
 app.get('/login', (req, res) => {
     res.render('login', { message: req.session.message });
 });
 
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const users = await getUsers();
+app.post('/login', passport.authenticate('login', {
+    successRedirect: '/products',
+    failureRedirect: '/login',
+    failureFlash: true
+})); // processar
 
-    
-    if (email === 'adminCoder@coder.com' && password === 'adminCod3r123') {
-        req.session.user = { email, role: 'admin' };
-        return res.redirect('/products'); // Verifica se o usuário é admin
-    }
-
-    const user = users.find(u => u.email === email && bcrypt.compareSync(password, u.password));
-    if (!user) {
-        req.session.message = 'Usuário ou senha inválidos!';
-        return res.redirect('/login');
-    } // Verifica usuários cadastrados
-
-    req.session.user = { email: user.email, role: 'user' };
-    res.redirect('/products');
-});
-
-//rotaderegistro
+//!Registro rota
 app.get('/register', (req, res) => {
-    res.render('register', { message: req.session.message });
+    res.render('register');
 });
 
-app.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-    const users = await getUsers();
+app.post('/register', passport.authenticate('register', {
+    successRedirect: '/login',
+    failureRedirect: '/register',
+    failureFlash: true
+})); // processar
 
-    if (users.find(u => u.email === email)) {
-        req.session.message = 'Este e-mail já está registrado!';
-        return res.redirect('/register');
-    }
+app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+app.get('/auth/github/callback', passport.authenticate('github', {
+    successRedirect: '/products',
+    failureRedirect: '/login'
+})); //! Rota de Login via GitHub
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    users.push({ email, password: hashedPassword });
 
-    await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-
-    req.session.message = 'Registro bem-sucedido! Faça login.';
-    res.redirect('/login');
-});
-
-//logout
 app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
+    req.logout(() => {
         res.redirect('/login');
     });
-});
+}); //!Logout
 
+//! Products Routes
 app.get('/products', (req, res) => {
-    if (!req.session.user) {
+    if (!req.isAuthenticated()) {
         return res.redirect('/login');
     }
     
-    res.render('products', { user: req.session.user });
-}); //! Rota de produtos (!somente para usuários logados)
+    res.render('products', { user: req.user });
+});
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
