@@ -1,72 +1,101 @@
 const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
+const session = require('express-session');
 const { engine } = require('express-handlebars');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server);
-
 const PORT = 3000;
-const DATA_PATH = 'products.json';
+const USERS_FILE = 'users.json';
 
+//TODO Handlebars
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
-app.set('views', './views'); //TODO handlebars configuration
+app.set('views', './views');
 
+//TODO Middleware
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(session({
+    secret: 'segredo_super_secreto',
+    resave: false,
+    saveUninitialized: true
+}));
 
-const getProducts = async () => {
+// Read files //
+const getUsers = async () => {
     try {
-        const data = await fs.promises.readFile(DATA_PATH, 'utf-8');
+        const data = await fs.promises.readFile(USERS_FILE, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
         return [];
     }
 };
 
-//! Home Route
-app.get('/', async (req, res) => {
-    const products = await getProducts();
-    res.render('home', { products });
+//!Login routes //
+app.get('/login', (req, res) => {
+    res.render('login', { message: req.session.message });
 });
 
-app.get('/realtimeproducts', async (req, res) => {
-    const products = await getProducts();
-    res.render('realTimeProducts', { products });
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    const users = await getUsers();
+
+    
+    if (email === 'adminCoder@coder.com' && password === 'adminCod3r123') {
+        req.session.user = { email, role: 'admin' };
+        return res.redirect('/products'); // Verifica se o usuário é admin
+    }
+
+    const user = users.find(u => u.email === email && bcrypt.compareSync(password, u.password));
+    if (!user) {
+        req.session.message = 'Usuário ou senha inválidos!';
+        return res.redirect('/login');
+    } // Verifica usuários cadastrados
+
+    req.session.user = { email: user.email, role: 'user' };
+    res.redirect('/products');
 });
 
-//? WebSockets
-io.on('connection', (socket) => {
-    console.log('Novo cliente conectado');
+//rotaderegistro
+app.get('/register', (req, res) => {
+    res.render('register', { message: req.session.message });
+});
 
-    socket.emit('updateProducts', getProducts());
+app.post('/register', async (req, res) => {
+    const { email, password } = req.body;
+    const users = await getUsers();
 
-    socket.on('addProduct', async (product) => {
-        let products = await getProducts();
-        const newProduct = {
-            id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
-            ...product
-        };
-        products.push(newProduct);
-        await fs.promises.writeFile(DATA_PATH, JSON.stringify(products, null, 2));
+    if (users.find(u => u.email === email)) {
+        req.session.message = 'Este e-mail já está registrado!';
+        return res.redirect('/register');
+    }
 
-        io.emit('updateProducts', products);
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    users.push({ email, password: hashedPassword });
+
+    await fs.promises.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+
+    req.session.message = 'Registro bem-sucedido! Faça login.';
+    res.redirect('/login');
+});
+
+//logout
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
     });
-
-    socket.on('deleteProduct', async (id) => {
-        let products = await getProducts();
-        const filteredProducts = products.filter(product => product.id !== id);
-
-        if (products.length !== filteredProducts.length) {
-            await fs.promises.writeFile(DATA_PATH, JSON.stringify(filteredProducts, null, 2));
-            io.emit('updateProducts', filteredProducts);
-        }
-    });
 });
 
-server.listen(PORT, () => {
+app.get('/products', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    
+    res.render('products', { user: req.session.user });
+}); //! Rota de produtos (!somente para usuários logados)
+
+app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
