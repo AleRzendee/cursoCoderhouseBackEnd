@@ -1,13 +1,5 @@
-<h2>Material referente as entregas dos desafios no curso de Back-End na Coderhouse Brasil</h2>
-
+<h1>Descrição:</h1>
 <hr>
-
-<h3> Aulas com entrega:</h3>
-<ul>
-<div>Aula 2 ( Classes com ECMAScript e ECMAScript avançado )</div>
-<div>Aula 4 ( Gestão de arquivos em JavaScript )</div>
-<div>Aula 6 ( Servidor com Express )</div>
-
-</ul>
-
-<span>Acesse as aulas pelas branches</span>
+<div>
+<p>18/02/2025 Desafio ( Implementação de Login ) da Aula 19 ( Cookies, Sessions & Storage II ) do curso de Back-end na CoderHouse; Turma #63515 de 2024/25.</p>
+</div>
