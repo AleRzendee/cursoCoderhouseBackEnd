@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/AleRzendee/cursoCoderhouseBackEnd/issues"
   },
-  "homepage": "https://github.com/AleRzendee/cursoCoderhouseBackEnd#readme"
+  "homepage": "https://github.com/AleRzendee/cursoCoderhouseBackEnd#readme",
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  }
 }
