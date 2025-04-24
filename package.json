@@ -1,0 +1,19 @@
+{
+  "name": "aula-32",
+  "version": "1.0.0",
+  "description": "Aula 32 do curso",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AleRzendee/cursoCoderhouseBackEnd.git"
+  },
+  "author": "Ale Rezende",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AleRzendee/cursoCoderhouseBackEnd/issues"
+  },
+  "homepage": "https://github.com/AleRzendee/cursoCoderhouseBackEnd#readme"
+}
