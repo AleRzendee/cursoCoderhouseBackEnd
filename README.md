@@ -13,6 +13,10 @@
 <div>Aula 17 ( Mongo Avançado II )</div>
 <div>Aula 19 ( Cookies, Sessions & Storage II )</div>
 <div>Aula 21 ( Estratégia de autenticação de terceiros + JWT )</div>
+<div>Aula 27 ( Reestruturação do nosso servidor )</div>
+<div>Aula 30 ( Entrega Parcial 3 do Projeto Final )</div>
+<div>Aula 32 ( Mocking e tratamento de erros )</div>
+<div>Aula 34 ( Implementação do registrador )</div>
 
 </ul>
 
