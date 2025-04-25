@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/AleRzendee/cursoCoderhouseBackEnd/issues"
   },
-  "homepage": "https://github.com/AleRzendee/cursoCoderhouseBackEnd#readme"
+  "homepage": "https://github.com/AleRzendee/cursoCoderhouseBackEnd#readme",
+  "dependencies": {
+    "winston": "^3.17.0"
+  }
 }
