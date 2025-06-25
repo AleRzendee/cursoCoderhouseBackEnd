@@ -17,6 +17,8 @@
 <div>Aula 30 ( Entrega Parcial 3 do Projeto Final )</div>
 <div>Aula 32 ( Mocking e tratamento de erros )</div>
 <div>Aula 34 ( Implementação do registrador )</div>
+<div>Aula 39 ( Documentar uma API )</div>
+<div>Aula 48 ( Entrega do Projeto Final )</div>
 
 </ul>
 
